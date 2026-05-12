@@ -1,6 +1,22 @@
 vim.keymap.set("n","<C-a>", "<Nop>", { noremap = true, silent = true})
 vim.keymap.set("v","<C-a>", "<Nop>", { noremap = true, silent = true})
 
+vim.keymap.set("v", "//", function()
+	local old_reg = vim.fn.getreg('"') --preserve reg
+
+	-- yank visual selection into register "
+	vim.cmd([[normal! y]])
+	local text = vim.fn.getreg('"')
+
+	vim.fn.setreg('"', old_reg)
+
+	text = vim.fn.escape(text, [[/\]])
+
+	vim.fn.setreg('/', text)
+	vim.cmd("normal! /<CR>")
+	end, { silent = true }
+)
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
@@ -10,9 +26,33 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.textwidth = 72
 vim.opt.formatoptions="cqt"
-vim.opt.wrapmargin = 0
 
 vim.opt.mouse = "a"
+
+
+local function set_transparent()
+	local groups = {
+		"Normal",
+		"NormalNC",
+		"EndOfBuffer",
+		"NormalFloat",
+		"FloatBorder",
+		"SignColumn",
+		"StatusLine",
+		"StatusLineNC",
+		"TabLine",
+		"TabLineFill",
+		"TabLineSel",
+		"ColorColumn",
+	}
+
+	for _, g in ipairs(groups) do
+		vim.api.nvim_set_hl(0, g, {bg = "none"})
+	end
+	vim.api.nvim_set_hl(0, "TabLineFill", {bg = "none", fg = "#767676"})
+end
+
+set_transparent()
 
 vim.opt.showmode = false
 vim.opt.clipboard = "unnamedplus"
@@ -24,6 +64,8 @@ vim.opt.signcolumn = "yes"
 vim.opt.updatetime = 250
 vim.opt.timeoutlen = 300
 
+vim.opt.hlsearch = true -- highlight search matches
+vim.opt.incsearch = true
 
 vim.opt.swapfile = false
 vim.opt.splitright = true
@@ -36,19 +78,23 @@ vim.opt.inccommand = "split"
 
 vim.opt.cursorline = true
 vim.opt.linebreak = true
-vim.opt.wrap = true
+vim.opt.wrap = false
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 0
+vim.opt.scrolloff = 10
 
-vim.opt.tabstop = 4
+vim.opt.tabstop = 8
+vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.autoindent = true
 
+vim.opt.autoread = true
+vim.opt.autowrite = false
+
 -- [[ Basic Keymaps ]]
-vim.opt.hlsearch = true
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 vim.keymap.set("i", "jk", "<Esc>")
+
 
 -- Diagnostic keymaps
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
@@ -97,9 +143,8 @@ require("lazy").setup({
 		},
         }
 		end,
-    },
+	},
 	{"cappyzawa/trim.nvim",opts = {}},
-	{ "bluz71/vim-moonfly-colors", name = "moonfly", lazy = false, priority = 1000 },
 	{ "jpalardy/vim-slime" },
 	{
 		"lervag/vimtex",
@@ -107,6 +152,22 @@ require("lazy").setup({
 		init = function()
 			-- Use init for configuration, don't use the more common "config".
 		end
+	},
+	{
+	  'Julian/lean.nvim',
+	  event = { 'BufReadPre *.lean', 'BufNewFile *.lean' },
+
+	  dependencies = {
+	    'nvim-telescope/telescope.nvim', -- for Lean-specific pickers
+	    -- 'andymass/vim-matchup',          -- for enhanced % motion behavior
+	    -- 'andrewradev/switch.vim',        -- for switch support
+	    -- 'tomtom/tcomment_vim',           -- for commenting
+	  },
+
+	  ---@type lean.Config
+	  opts = { -- see the manual for full configuration options
+	    mappings = true,
+	  }
 	},
 	{
 	    "iamcco/markdown-preview.nvim",
@@ -131,14 +192,6 @@ require("lazy").setup({
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 		}
-	},
-	{
-		"mason-org/mason-lspconfig.nvim",
-		opts = {},
-		dependencies = {
-			{ "mason-org/mason.nvim", opts = {} },
-			"neovim/nvim-lspconfig",
-		},
 	},
 	{
 	  "ibhagwan/fzf-lua",
@@ -284,10 +337,28 @@ require("lazy").setup({
 	},
 })
 
-
 local mark = require("harpoon.mark")
 local ui = require("harpoon.ui")
 local term = require("harpoon.term")
+
+
+
+vim.lsp.config("julials", {
+  cmd = { "julia",
+	"--project=@/Users/masonmccallum/.julia/environments/nvim-lspconfig",
+		"--startup-file=no", "--history-file=no", "-e",
+    [[
+    using LanguageServer, SymbolServer;
+    server = LanguageServer.LanguageServerInstance(stdin, stdout);
+    run(server);
+    ]]
+  }
+})
+vim.lsp.enable("lean")
+vim.lsp.enable("julials")
+vim.lsp.enable("lua_ls")
+vim.lsp.enable("pyright")
+
 
 -- [[ harpoon ]]
 vim.keymap.set("n", "<leader>a", mark.add_file, { desc = 'Add current file to harpoon list' })
@@ -301,7 +372,6 @@ vim.keymap.set("n", "<C-l>", function() ui.nav_file(4) end, { desc = 'jump to fo
 -- [[ vimwiki ]]
 vim.g.vimwiki_auto_header = 1
 -- Lua initialization file
-pcall(vim.cmd, "colorscheme moonfly")
 
 -- [[ MarkdownPreview ]]
 vim.api.nvim_command([[let g:mkdp_auto_start = 0]])
