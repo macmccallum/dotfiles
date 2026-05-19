@@ -1,14 +1,3 @@
 alias vim="nvim"
 
-if [ -d  ~/spack ]; then
-    	. ~/spack/share/spack/setup-env.sh
-	if [ -d  ~/spack/var/spack/environments/dev-env ]; then
-		spack env activate -p dev-env
-	else
-		echo "no env dev-env"
-	fi
-else
-	echo "Error: no dir ~/spack"
-fi
-
 [ -f  ~/.fzf.bash ] && source ~/.fzf.bash

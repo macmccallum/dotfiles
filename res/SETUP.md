@@ -37,6 +37,7 @@ This will install:
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 ### 4.5 Install juliaup
+# https://github.com/JuliaLang/juliaup/wiki/Permission-problems-during-setup
 curl -fsSL https://install.julialang.org | sh
 
 ### 5. Stow Neovim and Tmux Configurations
