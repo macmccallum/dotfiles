@@ -1,5 +1,5 @@
 {
-  description = "Development environment with Claude CLI, tmux, neovim, juliaup, and dotfiles";
+  description = "Development environment with Claude CLI, tmux, neovim, and dotfiles";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
@@ -16,7 +16,6 @@
           buildInputs = with pkgs; [
             tmux
             neovim
-            juliaup
             gh
             stow
             git
@@ -26,7 +25,7 @@
 
           shellHook = ''
             echo "Development environment loaded"
-            echo "Available tools: claude-cli, tmux, neovim, juliaup, gh, stow"
+            echo "Available tools: claude-cli, tmux, neovim, gh, stow"
           '';
         };
       }

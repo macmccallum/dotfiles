@@ -26,7 +26,6 @@ nix develop
 This will install:
 - tmux
 - neovim
-- juliaup
 - gh (GitHub CLI)
 - stow
 - git
@@ -37,6 +36,8 @@ This will install:
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash
 ```
+### 4.5 Install juliaup
+curl -fsSL https://install.julialang.org | sh
 
 ### 5. Stow Neovim and Tmux Configurations
 ```bash
