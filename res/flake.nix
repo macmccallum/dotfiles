@@ -21,11 +21,13 @@
             git
             curl
             tig
+            ripgrep
+            fzf
           ];
 
           shellHook = ''
             echo "Development environment loaded"
-            echo "Available tools: claude-cli, tmux, neovim, gh, stow"
+            echo "Available tools: tmux, neovim, gh, stow, tig, git, curl, rg, fzf"
           '';
         };
       }
