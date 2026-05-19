@@ -2,7 +2,7 @@
   description = "Development environment with Claude CLI, tmux, neovim, juliaup, and dotfiles";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -22,6 +22,7 @@
             stow
             git
             curl
+            tig
           ];
 
           shellHook = ''
