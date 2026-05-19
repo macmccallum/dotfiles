@@ -24,7 +24,6 @@ nix develop
 ```
 
 This will install:
-- claude-cli
 - tmux
 - neovim
 - juliaup
@@ -32,11 +31,17 @@ This will install:
 - stow
 - git
 - curl
+- tig
 
-### 4. Stow Neovim and Tmux Configurations
+### 4. Install Claude CLI
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+### 5. Stow Neovim and Tmux Configurations
 ```bash
 cd ~/dotfiles
-stow neovim tmux
+stow neovim tmux nix
 ```
 
 ## Notes
