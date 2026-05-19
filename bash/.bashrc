@@ -6,8 +6,13 @@ if [ -f ~/.bash_config ]; then
 fi
 
 # Nix
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+  . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+fi
+
+# Direnv (auto-loads nix devShell in project directories)
+if command -v direnv &> /dev/null; then
+  eval "$(direnv hook bash)"
 fi
 
 # >>> juliaup initialize >>>
@@ -26,3 +31,6 @@ esac
 [ -f "/home/masonmccallum/.julia/juliaup/completions/bash.sh" ] && source "/home/masonmccallum/.julia/juliaup/completions/bash.sh"
 
 # <<< juliaup initialize <<<
+
+# Pi
+export PATH="/home/masonmccallum/.local/share/pi-node/node-v22.22.3-linux-x64/bin:$PATH"

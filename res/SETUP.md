@@ -36,11 +36,16 @@ This will install:
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash
 ```
-### 4.5 Install juliaup
+
+### 4.5 Install PI
+```
+curl -fsSL https://pi.dev/install.sh | sh
+```
+### 5 Install juliaup
 # https://github.com/JuliaLang/juliaup/wiki/Permission-problems-during-setup
 curl -fsSL https://install.julialang.org | sh
 
-### 5. Stow Neovim and Tmux Configurations
+### 6. Stow Neovim and Tmux Configurations
 ```bash
 cd ~/dotfiles
 stow neovim tmux nix

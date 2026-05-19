@@ -143,7 +143,18 @@ require("lazy").setup({
 		end,
 	},
 	{"cappyzawa/trim.nvim",opts = {}},
-	{ "jpalardy/vim-slime" },
+	{
+		"jpalardy/vim-slime",
+		init = function()
+			vim.g.slime_target = "tmux"
+			vim.g.slime_bracketed_paste = 0
+			vim.g.slime_default_config = {
+				socket_name = vim.fn.split(vim.env.TMUX or "", ",")[1] or "default",
+				target_pane = ":.1",
+			}
+			vim.g.slime_dont_ask_default = 1
+		end,
+	},
 	{
 		"lervag/vimtex",
 		lazy=false,
@@ -393,10 +404,10 @@ vim.api.nvim_command([[let g:mkdp_auto_stop = 1]])
 -- [[ vimtex ]]
 vim.g.vimtex_view_method = 'skim'
 vim.g.vimtex_view_skim_exe = '/opt/homebrew/bin/skim'
--- [[ vim-slime config ]]
-vim.g.slime_target = "tmux"
+-- [[ vim-slime keymaps ]]
 vim.cmd[[xmap <leader>s <Plug>SlimeRegionSend]]
-vim.api.nvim_command([[let g:slime_default_config = {"socket_name":get(split($TMUX,","), 0), "target_pane":":1.0"}]])
+vim.cmd[[nmap <leader>s <Plug>SlimeMotionSend]]
+vim.cmd[[nmap <leader>ss <Plug>SlimeLineSend]]
 
 -- Make sure fzf-lua is required
 local fzf = require("fzf-lua")
