@@ -52,8 +52,6 @@ local function set_transparent()
 	vim.api.nvim_set_hl(0, "TabLineFill", {bg = "none", fg = "#767676"})
 end
 
-set_transparent()
-
 vim.opt.showmode = false
 vim.opt.clipboard = "unnamedplus"
 vim.opt.breakindent = true
@@ -311,6 +309,15 @@ require("lazy").setup({
 		event = "VimEnter",
 		dependencies = { "nvim-lua/plenary.nvim" },
 		opts = { signs = false },
+	},
+	{
+		"ellisonleao/gruvbox.nvim",
+		priority = 1000,
+		config = function()
+			require("gruvbox").setup({ transparent_mode = true })
+			vim.cmd.colorscheme("gruvbox")
+			set_transparent()
+		end,
 	},
 	{ "neovim/nvim-lspconfig" },
 	{
