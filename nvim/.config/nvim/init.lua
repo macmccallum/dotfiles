@@ -312,8 +312,15 @@ require("lazy").setup({
 		dependencies = { "nvim-lua/plenary.nvim" },
 		opts = { signs = false },
 	},
+	{ "neovim/nvim-lspconfig" },
+	{
+		"nvim-telescope/telescope.nvim",
+		tag = "0.1.8",
+		dependencies = { "nvim-lua/plenary.nvim" },
+	},
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
+		branch = "master",
 		build = ":TSUpdate",
 		opts = {
 			ensure_installed = { "bash", "julia","c", "html", "lua", "luadoc", "markdown", "vim", "vimdoc" },
@@ -343,10 +350,12 @@ local term = require("harpoon.term")
 
 
 
-vim.lsp.config("julials", {
+local lspconfig = require("lspconfig")
+
+lspconfig.julials.setup({
   cmd = { "julia",
-	"--project=@/Users/masonmccallum/.julia/environments/nvim-lspconfig",
-		"--startup-file=no", "--history-file=no", "-e",
+    "--project=@/home/masonmccallum/.julia/environments/nvim-lspconfig",
+    "--startup-file=no", "--history-file=no", "-e",
     [[
     using LanguageServer, SymbolServer;
     server = LanguageServer.LanguageServerInstance(stdin, stdout);
@@ -354,10 +363,8 @@ vim.lsp.config("julials", {
     ]]
   }
 })
-vim.lsp.enable("lean")
-vim.lsp.enable("julials")
-vim.lsp.enable("lua_ls")
-vim.lsp.enable("pyright")
+lspconfig.lua_ls.setup({})
+lspconfig.pyright.setup({})
 
 
 -- [[ harpoon ]]
