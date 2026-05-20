@@ -378,9 +378,7 @@ local term = require("harpoon.term")
 
 
 
-local lspconfig = require("lspconfig")
-
-lspconfig.julials.setup({
+vim.lsp.config('julials', {
   cmd = { "julia",
     "--project=@/home/masonmccallum/.julia/environments/nvim-lspconfig",
     "--startup-file=no", "--history-file=no", "-e",
@@ -391,8 +389,7 @@ lspconfig.julials.setup({
     ]]
   }
 })
-lspconfig.lua_ls.setup({})
-lspconfig.pyright.setup({})
+vim.lsp.enable({ 'julials', 'lua_ls', 'pyright' })
 
 
 -- [[ harpoon ]]
