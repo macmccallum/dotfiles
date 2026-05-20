@@ -54,6 +54,17 @@ end
 
 vim.opt.showmode = false
 vim.opt.clipboard = "unnamedplus"
+vim.g.clipboard = {
+	name = "OSC 52",
+	copy = {
+		["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+		["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+	},
+	paste = {
+		["+"] = require("vim.ui.clipboard.osc52").paste("+"),
+		["*"] = require("vim.ui.clipboard.osc52").paste("*"),
+	},
+}
 vim.opt.breakindent = true
 vim.opt.undofile = true
 vim.opt.ignorecase = true
@@ -150,9 +161,8 @@ require("lazy").setup({
 			vim.g.slime_bracketed_paste = 0
 			vim.g.slime_default_config = {
 				socket_name = vim.fn.split(vim.env.TMUX or "", ",")[1] or "default",
-				target_pane = ":.1",
+				target_pane = "",
 			}
-			vim.g.slime_dont_ask_default = 1
 		end,
 	},
 	{
