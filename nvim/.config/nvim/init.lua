@@ -121,6 +121,16 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
+-- Ensure XDG_RUNTIME_DIR exists and is writeable (fzf-lua's server needs it)
+do
+	local xdg = vim.env.XDG_RUNTIME_DIR
+	if not xdg or vim.fn.isdirectory(xdg) == 0 then
+		xdg = vim.fn.stdpath("cache") .. "/runtime"
+		vim.fn.mkdir(xdg, "p")
+		vim.env.XDG_RUNTIME_DIR = xdg
+	end
+end
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -218,14 +228,13 @@ require("lazy").setup({
 	  dependencies = { "nvim-tree/nvim-web-devicons" },
 	  -- or if using mini.icons/mini.nvim
 	  -- dependencies = { "nvim-mini/mini.icons" },
-	  opts = {},
-		config = function()
+	  opts = {
 			defaults = {
 				file_icons = false,
 				git_icons = false,
 				color_icons = false,
-			}
-		end
+			},
+		},
 	},
 	{ -- Autocompletion
 		"hrsh7th/nvim-cmp",
@@ -378,18 +387,39 @@ local term = require("harpoon.term")
 
 
 
-vim.lsp.config('julials', {
-  cmd = { "julia",
-    "--project=@/home/masonmccallum/.julia/environments/nvim-lspconfig",
-    "--startup-file=no", "--history-file=no", "-e",
-    [[
-    using LanguageServer, SymbolServer;
-    server = LanguageServer.LanguageServerInstance(stdin, stdout);
-    run(server);
-    ]]
-  }
-})
-vim.lsp.enable({ 'julials', 'lua_ls', 'pyright' })
+if vim.lsp.config and vim.lsp.enable then
+  -- Neovim 0.11+ native LSP config API
+  vim.lsp.config('julials', {
+    cmd = { "julia",
+      "--project=@/home/masonmccallum/.julia/environments/nvim-lspconfig",
+      "--startup-file=no", "--history-file=no", "-e",
+      [[
+      using LanguageServer, SymbolServer;
+      server = LanguageServer.LanguageServerInstance(stdin, stdout);
+      run(server);
+      ]]
+    }
+  })
+  vim.lsp.enable({ 'julials', 'lua_ls', 'pyright' })
+else
+  -- Neovim 0.10 fallback via lspconfig
+  local ok, lspconfig = pcall(require, 'lspconfig')
+  if ok then
+    lspconfig.julials.setup({
+      cmd = { "julia",
+        "--project=@/home/masonmccallum/.julia/environments/nvim-lspconfig",
+        "--startup-file=no", "--history-file=no", "-e",
+        [[
+        using LanguageServer, SymbolServer;
+        server = LanguageServer.LanguageServerInstance(stdin, stdout);
+        run(server);
+        ]]
+      },
+    })
+    lspconfig.lua_ls.setup({})
+    lspconfig.pyright.setup({})
+  end
+end
 
 
 -- [[ harpoon ]]
