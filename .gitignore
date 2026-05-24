@@ -1,0 +1,12 @@
+# Nix build outputs
+/result
+/result-*
+res/result
+res/result-*
+
+# direnv cache (if nix-direnv ever lands here)
+.direnv/
+
+# Editor / OS noise
+.DS_Store
+*.swp

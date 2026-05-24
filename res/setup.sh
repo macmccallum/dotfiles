@@ -1,29 +1,63 @@
 #!/usr/bin/env bash
+# Bootstrap for any fresh box (Lightning Studio, generic Linux, macOS).
+#
+# Everything declarative lives in ~/dotfiles/flake.nix + ~/dotfiles/hm/.
+# This script only handles the chicken-and-egg parts: get the repo on disk,
+# install Nix, then hand off to home-manager.
+#
+# Usage:
+#     bash dotfiles/res/setup.sh [linux|mac]
+# Defaults to `linux` on Linux, `mac` on Darwin.
+
 set -euo pipefail
 
-# Install Nix
-curl -L https://nixos.org/nix/install | sh
-source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+PERSIST_DIR="${PERSIST_DIR:-$HOME}"
+DOTFILES="${DOTFILES:-$PERSIST_DIR/dotfiles}"
+REPO_URL="https://github.com/macmccallum/dotfiles.git"
 
-# Clone dotfiles repository
-git clone https://github.com/macmccallum/dotfiles.git ~/dotfiles
+log() { printf '\033[1;34m[setup]\033[0m %s\n' "$*"; }
 
-# Enter Nix development environment and install tools
-cd ~/dotfiles/res
-nix flake update
-nix develop --command true
+# 1. Dotfiles on disk
+if [ ! -d "$DOTFILES/.git" ]; then
+  log "cloning dotfiles into $DOTFILES"
+  git clone "$REPO_URL" "$DOTFILES"
+else
+  log "dotfiles present at $DOTFILES"
+fi
+# Make ~/dotfiles point at the repo, but only if it isn't already the repo
+# itself. (When $DOTFILES == $HOME/dotfiles the previous `ln -sfn` would
+# create a self-symlink *inside* the directory.)
+if [ "$DOTFILES" != "$HOME/dotfiles" ] && [ ! -e "$HOME/dotfiles" ]; then
+  ln -s "$DOTFILES" "$HOME/dotfiles"
+fi
 
-# Install Claude CLI
-#curl -fsSL https://claude.ai/install.sh | bash
+# 2. Nix (single-user / no-daemon). On macOS this still needs one-time sudo
+#    to create /nix; everywhere else it's fully rootless.
+if [ ! -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+  log "installing nix (single-user)"
+  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+fi
+# shellcheck disable=SC1091
+. "$HOME/.nix-profile/etc/profile.d/nix.sh"
 
-# Install PI
-curl -fsSL https://pi.dev/install.sh | sh
-export PATH="$HOME/.local/share/pi-node/current/bin:$PATH"
+# 3. Pick host profile
+PROFILE="${1:-}"
+if [ -z "$PROFILE" ]; then
+  case "$(uname)" in
+    Darwin) PROFILE=mac ;;
+    Linux)  PROFILE=linux ;;
+    *) echo "unsupported OS: $(uname)" >&2; exit 1 ;;
+  esac
+fi
+log "activating home-manager profile: $PROFILE"
 
-# Install juliaup
-curl -fsSL https://install.julialang.org | sh -s -- --yes
-export PATH="$HOME/.juliaup/bin:$PATH"
+# 4. Build + activate. --impure so `home.{username,homeDirectory}` can read
+#    $USER / $HOME (pure flake eval would force per-host hardcoding).
+OUT_LINK="$HOME/.cache/home-manager-result"
+mkdir -p "$(dirname "$OUT_LINK")"
+nix --extra-experimental-features 'nix-command flakes' \
+  build --impure --out-link "$OUT_LINK" \
+  "$DOTFILES#homeConfigurations.$PROFILE.activationPackage"
+"$OUT_LINK/activate"
 
-# Stow neovim, tmux, and nix configurations
-cd ~/dotfiles
-stow neovim tmux nix
+log "done. open a new shell, or: source ~/.nix-profile/etc/profile.d/nix.sh"
