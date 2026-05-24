@@ -63,6 +63,20 @@ if [ -z "$PROFILE" ]; then
 fi
 log "activating home-manager profile: $PROFILE"
 
+# 3b. Heal a corrupted libgit2 tarball cache. On some hosts (e.g. Lightning
+#     Studios after a persistence reset) this directory exists but is not a
+#     valid git repo, which makes `nix build` fail with libgit2 error 6
+#     before evaluation even starts.
+for d in "$HOME/.cache/nix/tarball-cache-v2" \
+         "${XDG_CACHE_HOME:-}/nix/tarball-cache-v2"; do
+  [ -n "$d" ] || continue
+  [ -e "$d" ] || continue
+  if [ ! -e "$d/HEAD" ] && [ ! -d "$d/.git" ]; then
+    log "removing corrupt nix tarball cache: $d"
+    rm -rf "$d"
+  fi
+done
+
 # 4. Build + activate. --impure so `home.{username,homeDirectory}` can read
 #    $USER / $HOME (pure flake eval would force per-host hardcoding).
 OUT_LINK="$HOME/.cache/home-manager-result"
