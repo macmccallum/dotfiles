@@ -72,4 +72,10 @@ nix --extra-experimental-features 'nix-command flakes' \
   "$DOTFILES#homeConfigurations.$PROFILE.activationPackage"
 "$OUT_LINK/activate"
 
-log "done. open a new shell, or: source ~/.nix-profile/etc/profile.d/nix.sh"
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+  log "done. open a new shell, or: source ~/.nix-profile/etc/profile.d/nix.sh"
+elif [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+  log "done. open a new shell, or: source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+else
+  log "done. open a new shell to pick up the Nix environment."
+fi
