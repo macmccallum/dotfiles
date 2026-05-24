@@ -23,8 +23,11 @@ bash ~/dotfiles/res/setup.sh linux  # force a profile
 The script:
 
 1. Clones this repo to `~/dotfiles` if missing.
-2. Installs Nix single-user (`--no-daemon`) if missing. On macOS this needs
-   one-time `sudo` to create `/nix` (SIP). Everywhere else is fully rootless.
+2. Installs Nix if missing. On **macOS** this uses the official
+   multi-user (`--daemon`) installer — single-user mode is no longer
+   supported on Darwin, so a `nix-daemon` runs via `launchd` and a one-time
+   `sudo` is required. On **Linux** it uses single-user (`--no-daemon`),
+   fully rootless.
 3. Builds and activates the home-manager profile.
 
 ## Re-activate after editing the flake

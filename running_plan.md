@@ -18,8 +18,10 @@ machines. Stow stays functional in parallel during migration.
 ## Decisions locked in
 
 - Two generic host profiles (`mac`, `linux`), not per-machine.
-- Single-user Nix everywhere (`--no-daemon`). One-time `sudo` needed on macOS
-  to create `/nix` (SIP). Linux is fully rootless.
+- Nix install mode is OS-dependent: **single-user (`--no-daemon`)** on Linux
+  (fully rootless), **multi-user (`--daemon`)** on macOS. The official
+  installer dropped single-user support on Darwin, so macOS gets a
+  `nix-daemon` via `launchd` with a one-time `sudo`.
 - Keep `res/flake.nix` dev shell as-is; orthogonal concern.
 - macOS GUI tools (aerospace, hammerspoon, qutebrowser) deferred to a later
   session.
@@ -62,7 +64,11 @@ machines. Stow stays functional in parallel during migration.
         `nix build --impure ...#homeConfigurations.<profile>.activationPackage`
         then `./result/activate`. End-to-end re-run on Lightning works
         (created generation 2).
-11. [ ] Commit. Push. Test on Mac (you, later).
+11. [x] Fix Mac bootstrap: `--no-daemon` is rejected by the official
+        installer on Darwin. `setup.sh` now branches on `uname` and uses
+        `--daemon` on macOS, `--no-daemon` on Linux, and sources the
+        appropriate profile script (`nix.sh` vs `nix-daemon.sh`).
+12. [ ] Commit. Push. Test on Mac (you, later).
 
 ## Gotchas encountered (for future-you)
 
@@ -105,12 +111,12 @@ machines. Stow stays functional in parallel during migration.
   pre-install plugins via an activation script that runs
   `~/.config/tmux/plugins/tpm/bin/install_plugins`?
 - Determinate Systems installer vs official installer for the bootstrap line.
-  (Currently: official, `--no-daemon`.)
+  (Currently: official; `--no-daemon` on Linux, `--daemon` on macOS.)
 
 ## Test matrix
 
 | Host           | Profile | Shell | Status     |
 |----------------|---------|-------|------------|
 | Lightning Std. | linux   | bash  | **passing** (gen 2) |
-| Mac (M-series) | mac     | zsh   | not tested |
+| Mac (M-series) | mac     | zsh   | not tested (daemon-mode install) |
 | Generic Linux  | linux   | bash  | not tested |

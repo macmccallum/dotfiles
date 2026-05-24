@@ -31,14 +31,26 @@ if [ "$DOTFILES" != "$HOME/dotfiles" ] && [ ! -e "$HOME/dotfiles" ]; then
   ln -s "$DOTFILES" "$HOME/dotfiles"
 fi
 
-# 2. Nix (single-user / no-daemon). On macOS this still needs one-time sudo
-#    to create /nix; everywhere else it's fully rootless.
-if [ ! -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-  log "installing nix (single-user)"
-  curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+# 2. Nix. macOS requires daemon (multi-user) mode; Linux uses single-user.
+if [ ! -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ] \
+   && [ ! -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+  case "$(uname)" in
+    Darwin)
+      log "installing nix (daemon, macOS)"
+      curl -L https://nixos.org/nix/install | sh -s -- --daemon
+      ;;
+    *)
+      log "installing nix (single-user)"
+      curl -L https://nixos.org/nix/install | sh -s -- --no-daemon
+      ;;
+  esac
 fi
 # shellcheck disable=SC1091
-. "$HOME/.nix-profile/etc/profile.d/nix.sh"
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+  . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+elif [ -e "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]; then
+  . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+fi
 
 # 3. Pick host profile
 PROFILE="${1:-}"
