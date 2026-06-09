@@ -1,4 +1,2 @@
 alias vim="nvim"
-
-[ -f  ~/.fzf.bash ] && source ~/.fzf.bash
-source /home/masonmccallum/.nix-profile/etc/profile.d/nix.sh
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
